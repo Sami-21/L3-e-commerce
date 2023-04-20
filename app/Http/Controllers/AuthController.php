@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AuthRequest;
+use App\Models\Client;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,12 +36,15 @@ class AuthController extends Controller
     public function register(AuthRequest $request)
     {
         //validated Request body
-        $validated = $request->validate();
+        $validated = $request->validated();
         //Create user
         $user = User::create(array_merge($validated, [
             'password' => Hash::make($request->password),
             'role_id' => 2
         ]));
+        Client::create([
+            'user_id' => $user->id
+        ]);
         //Generate token
         $token = $user->createToken('auth_token')->plainTextToken;
         //Return user and token
@@ -48,6 +52,12 @@ class AuthController extends Controller
             'user' => $user,
             'token' => $token
         ], 201);
+    }
+
+    public function getUser($id)
+    {
+        $user = User::with(['role'])->findOrFail($id);
+        return response()->json($user, 201);
     }
 
     public function logout(Request $request)
