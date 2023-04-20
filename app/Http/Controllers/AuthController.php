@@ -4,37 +4,60 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AuthRequest;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    public function login(Request $request)
+    {
+        //validated Request body
+        $request->validate([
+            'email' =>  'required|string',
+            'password' => 'required|string',
+        ]);
+        //Check if user exists and password is correct
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json([
+                'message' => 'check your credentials',
+            ], 401);
+        }
+        //Generate token
+        $token = auth()->user()->createToken('auth_token')->plainTextToken;
+        //Return user and token
+        return response()->json([
+            'user' => auth()->user(),
+            'token' => $token
+        ], 200);
+    }
+
     public function register(AuthRequest $request)
     {
-        $request->validate([
-            [
-                'firstname' => 'required|max:255|string',
-                'lastname' => 'required|max:255|string',
-                'email' => 'required|email|unique:user',
-                'password' => 'required|string',
-                'password_confirmation' => 'required|string|same:password',
-            ]
-        ]);
-
-        $user =  new User([
-            'firstname' => $request->firstname,
-            'lastname' => $request->lastname,
-            'email' => $request->email,
-            'password' => $request->password,
+        //validated Request body
+        $validated = $request->validate();
+        //Create user
+        $user = User::create(array_merge($validated, [
+            'password' => Hash::make($request->password),
             'role_id' => 2
-        ]);
+        ]));
+        //Generate token
+        $token = $user->createToken('auth_token')->plainTextToken;
+        //Return user and token
+        return response()->json([
+            'user' => $user,
+            'token' => $token
+        ], 201);
+    }
 
-        if ($user->save()) {
-            return response()->json([
-                'message' => 'client saved with success'
-            ]);
-        } else {
-            return response()->json([
-                'message' => 'error occured when saving new client'
-            ]);
-        }
+    public function logout(Request $request)
+    {
+        //Delete token
+        $request->user()->currentAccessToken()->delete();
+        //Return success message
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Successfully logged out',
+        ]);
     }
 }
