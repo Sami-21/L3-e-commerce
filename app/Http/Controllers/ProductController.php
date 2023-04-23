@@ -3,39 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductRequest;
+use App\Models\Image;
 use App\Models\Product;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use \Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+
+    public function all()
     {
         return Product::with('images')->get();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(ProductRequest $request)
+    public function add(ProductRequest $request)
     {
         //Validate the request
         $request->validated();
@@ -50,10 +31,9 @@ class ProductController extends Controller
         //Upload the images
         $images = [];
         foreach ($request->file('images') as $i => $image) {
-            $source_image = $image;
             $destinationPath = 'public/images/products';
-            $imageName = Str::uuid() . "." . $source_image->clientExtension();
-            $source_image->storeAs($destinationPath, $imageName);
+            $imageName = Str::uuid() . "." . $image->clientExtension();
+            $image->storeAs($destinationPath, $imageName);
             $images[$i] = [
                 'name' => $imageName,
                 'path' => $destinationPath . "/" . $imageName,
@@ -64,52 +44,84 @@ class ProductController extends Controller
         //Return the response
         return response()->json([
             'message' => 'Product created successfully',
-            'product' => $images
+            'product' => $product
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Product $product)
+
+    public function get($id)
     {
-        //
+        return Product::with('images')->find($id);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Product $product)
+    public function update(ProductRequest $request, $id)
     {
-        //
+        // $validated = $request->validated();
+
+        // $product = Product::findOrFail($id);
+
+        // $product->update($validated);
+
+
+        // if (array_key_exists('deleted_images', $validated) && count($validated['deleted_images'])) {
+        //     foreach ($validated['deleted_images'] as $src) {
+        //         $deleted_images = Image::findOrFail($src['id']);
+        //         Storage::delete('images/products/' . $deleted_images->name);
+        //         $deleted_images->delete();
+        //     }
+        // }
+
+        // $images = [];
+        // foreach ($request->file('images') as $i => $image) {
+        //     if (!array_key_exists('id', $validated['images'][$i])) {
+        //         $destinationPath = 'public/images/products';
+        //         $imageName = Str::uuid() . "." . $image->clientExtension();
+        //         $image->storeAs($destinationPath, $imageName);
+        //         $images[$i] = [
+        //             'name' => $imageName,
+        //             'path' => $destinationPath . "/" . $imageName,
+        //         ];
+        //     } else {
+        //         $images = Product::findOrFail($validated['images'][$i]['id']);
+        //         if (!empty($request->file('images')[$i])) {
+        //             Storage::delete('images/products/' . $images->image);
+        //             $images_image = $request->file('images')[$i]['name'];
+        //             $destinationPath = 'images/products';
+        //             $imageName = Str::uuid() . "." . $images_image->getClientOriginalExtension();
+        //             $images_image->storeAs($destinationPath, $imageName);
+        //             $images->update([
+        //                 'name' => $imageName,
+        //                 'path' => $destinationPath . "/" . $imageName,
+        //             ]);
+        //         } else {
+        //             $images->update([
+        //                 'path' => $validated['images'][$i]['path'],
+        //             ]);
+        //         }
+        //     }
+        // }
+
+        // if (count($images)) {
+        //     $product->images()->createMany($images);
+        // }
+
+        // return response()->json([
+        //     'message' => 'product updated successfully',
+        //     $product
+        // ], 201);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Product $product)
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Product $product)
+    public function destroy($id)
     {
-        //
+        $product = Product::findOrfail($id);
+        foreach ($product->images as $image) {
+            Storage::delete('images/products/' . $image->name);
+            $image->delete();
+        }
+        $product->delete();
+        return response()->json([
+            'message' => 'Product deleted successfully',
+        ]);
     }
 }

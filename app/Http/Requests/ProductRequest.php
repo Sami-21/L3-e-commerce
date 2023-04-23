@@ -23,13 +23,27 @@ class ProductRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'name' => ['string', 'required', 'max:255'],
-            'price' => ['numeric', 'required'],
-            'features' => ['json', 'required'],
-            'colors' => ['json', 'required'],
-            'images' => ['required'],
-
-        ];
+        switch ($this->getMethod()) {
+            case "POST":
+                return
+                    [
+                        'name' => ['string', 'required', 'max:255'],
+                        'price' => ['numeric', 'required'],
+                        'features' => ['json', 'required'],
+                        'colors' => ['json', 'required'],
+                        'images' => ['required'],
+                    ];
+            case "PUT":
+                return
+                    [
+                        // 'name' => ['string', 'required', 'max:255'],
+                        // 'price' => ['numeric', 'required'],
+                        // 'features' => ['json', 'required'],
+                        // 'colors' => ['json', 'required'],
+                        // 'images' => ['required'],
+                        // 'deleted_images' => ['required'],
+                    ];
+        }
+        return [];
     }
 }

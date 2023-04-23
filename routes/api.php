@@ -15,8 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
-
 // Authentication routes
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
@@ -28,10 +26,10 @@ Route::prefix('auth')->group(function () {
 });
 
 //Protected Routes 
-Route::middleware(['auth:sanctum'])->prefix('products')->group(function () {
-    Route::get('/', [ProductController::class, 'index']);
-    Route::post('/', [ProductController::class, 'store']);
-    Route::get('/{id}', [ProductController::class, 'show']);
-    Route::put('/{id}', [ProductController::class, 'update']);
+Route::prefix('products')->group(function () {
+    Route::get('/all', [ProductController::class, 'all']);
+    Route::post('/add', [ProductController::class, 'add']);
+    Route::get('/get/{id}', [ProductController::class, 'get']);
+    Route::put('/update/{id}', [ProductController::class, 'update']);
     Route::delete('/{id}', [ProductController::class, 'destroy']);
 });
