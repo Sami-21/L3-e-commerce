@@ -56,61 +56,73 @@ class ProductController extends Controller
 
     public function update(ProductRequest $request, $id)
     {
-        // $validated = $request->validated();
 
-        // $product = Product::findOrFail($id);
+        $validated = $request->validated();
 
-        // $product->update($validated);
+        $product = Product::findOrFail($id);
+
+        $product->update($validated);
 
 
-        // if (array_key_exists('deleted_images', $validated) && count($validated['deleted_images'])) {
-        //     foreach ($validated['deleted_images'] as $src) {
-        //         $deleted_images = Image::findOrFail($src['id']);
-        //         Storage::delete('images/products/' . $deleted_images->name);
-        //         $deleted_images->delete();
-        //     }
-        // }
+        if (array_key_exists('deleted_images', $validated) && count($validated['deleted_images'])) {
+            foreach ($validated['deleted_images'] as $src) {
+                $deleted_images = Image::findOrFail($src['id']);
+                Storage::delete('images/products/' . $deleted_images->name);
+                $deleted_images->delete();
+            }
+        }
 
-        // $images = [];
-        // foreach ($request->file('images') as $i => $image) {
-        //     if (!array_key_exists('id', $validated['images'][$i])) {
-        //         $destinationPath = 'public/images/products';
-        //         $imageName = Str::uuid() . "." . $image->clientExtension();
-        //         $image->storeAs($destinationPath, $imageName);
-        //         $images[$i] = [
-        //             'name' => $imageName,
-        //             'path' => $destinationPath . "/" . $imageName,
-        //         ];
-        //     } else {
-        //         $images = Product::findOrFail($validated['images'][$i]['id']);
-        //         if (!empty($request->file('images')[$i])) {
-        //             Storage::delete('images/products/' . $images->image);
-        //             $images_image = $request->file('images')[$i]['name'];
-        //             $destinationPath = 'images/products';
-        //             $imageName = Str::uuid() . "." . $images_image->getClientOriginalExtension();
-        //             $images_image->storeAs($destinationPath, $imageName);
-        //             $images->update([
-        //                 'name' => $imageName,
-        //                 'path' => $destinationPath . "/" . $imageName,
-        //             ]);
-        //         } else {
-        //             $images->update([
-        //                 'path' => $validated['images'][$i]['path'],
-        //             ]);
-        //         }
-        //     }
-        // }
+        $images = [];
+        foreach ($request->file('images') as $i => $image) {
+            if (!array_key_exists('id', $validated['images'][$i])) {
+                $destinationPath = 'public/images/products';
+                $imageName = Str::uuid() . "." . $image->clientExtension();
+                $image->storeAs($destinationPath, $imageName);
+                $images[$i] = [
+                    'name' => $imageName,
+                    'path' => $destinationPath . "/" . $imageName,
+                ];
+            } else {
+                $images = Product::findOrFail($validated['images'][$i]['id']);
+                if (!empty($request->file('images')[$i])) {
+                    Storage::delete('images/products/' . $images->image);
+                    $images_image = $request->file('images')[$i]['name'];
+                    $destinationPath = 'images/products';
+                    $imageName = Str::uuid() . "." . $images_image->getClientOriginalExtension();
+                    $images_image->storeAs($destinationPath, $imageName);
+                    $images->update([
+                        'name' => $imageName,
+                        'path' => $destinationPath . "/" . $imageName,
+                    ]);
+                } else {
+                    $images->update([
+                        'path' => $validated['images'][$i]['path'],
+                    ]);
+                }
+            }
+        }
 
-        // if (count($images)) {
-        //     $product->images()->createMany($images);
-        // }
+        if (count($images)) {
+            $product->images()->createMany($images);
+        }
 
-        // return response()->json([
-        //     'message' => 'product updated successfully',
-        //     $product
-        // ], 201);
+        return response()->json([
+            'message' => 'product updated successfully',
+            $product
+        ], 201);
     }
 
+
+    public function changeStatus($id)
+    {
+        $product = Product::findOrfail($id);
+        $product->update([
+            'status' => !$product->status
+        ]);
+        return response()->json([
+            'message' => 'Product status changed successfully',
+        ]);
+    }
 
     public function destroy($id)
     {

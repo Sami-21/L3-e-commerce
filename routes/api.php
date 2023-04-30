@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,5 +32,14 @@ Route::prefix('products')->group(function () {
     Route::post('/add', [ProductController::class, 'add']);
     Route::get('/get/{id}', [ProductController::class, 'get']);
     Route::put('/update/{id}', [ProductController::class, 'update']);
+    Route::patch('/changeStatus/{id}', [ProductController::class, 'changeStatus']);
     Route::delete('/{id}', [ProductController::class, 'destroy']);
+});
+
+//Orders Routes
+Route::prefix('orders')->group(function () {
+    Route::post('/add', [OrderController::class, 'add']);
+    Route::get('/all', [OrderController::class, 'all']);
+    Route::get('/get/{id}', [OrderController::class, 'get']);
+    Route::delete('/{id}', [OrderController::class, 'destroy']);
 });

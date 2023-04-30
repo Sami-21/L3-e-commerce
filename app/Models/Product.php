@@ -14,11 +14,16 @@ class Product extends Model
         'price',
         'features',
         'colors',
-        'rating',
+        'status'
     ];
 
     public function images()
     {
         return $this->hasMany(Image::class);
+    }
+
+    public function orders()
+    {
+        return $this->belongsToMany(Order::class)->withPivot(['quantity', 'price']);
     }
 }
