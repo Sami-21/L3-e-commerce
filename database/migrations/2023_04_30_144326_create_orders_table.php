@@ -18,9 +18,12 @@ return new class extends Migration
             $table->timestamps();
             $table->unsignedBigInteger('client_id');
             $table->foreign('client_id')->references('id')->on('clients');
+            $table->string('wilaya');
+            $table->string('city');
             $table->string('address');
             $table->string('phone');
-            $table->boolean('status')->default(true);
+            $table->date('delivery_date');
+            $table->string('status')->default('pending')->nullable(false);
             $table->text('notes')->nullable();
             $table->double('total')->default(0.0);
         });

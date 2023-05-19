@@ -21,6 +21,8 @@ return new class extends Migration
             $table->json('colors');
             $table->boolean('status')->default(true);
             $table->float('rating')->default(0.0);
+            $table->unsignedBigInteger('category_id');
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
             $table->timestamps();
         });
     }

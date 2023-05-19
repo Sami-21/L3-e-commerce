@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AuthRequest;
-use App\Models\Client;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,10 +24,11 @@ class AuthController extends Controller
             ], 401);
         }
         //Generate token
-        $token = auth()->user()->createToken('auth_token')->plainTextToken;
+        $user = $request->user();
+        $token = $user->createToken('auth_token')->plainTextToken;
         //Return user and token
         return response()->json([
-            'user' => auth()->user(),
+            'user' => $user,
             'token' => $token
         ], 200);
     }
@@ -40,13 +40,10 @@ class AuthController extends Controller
         //Create user
         $user = User::create(array_merge($validated, [
             'password' => Hash::make($request->password),
-            'role_id' => 2
+            'role_id' => 1
         ]));
-        Client::create([
-            'user_id' => $user->id
-        ]);
         //Generate token
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('admin', ['admin'])->plainTextToken;
         //Return user and token
         return response()->json([
             'user' => $user,
@@ -54,10 +51,26 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function getUser($id)
+    public function changePassword(Request $request, $id)
     {
-        $user = User::with(['role'])->findOrFail($id);
-        return response()->json($user, 201);
+        $request->validate([
+            'current_password' => 'required|string|min:8',
+            'password' => 'required|string|confirmed|min:8',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->with('error', 'Current password does not match !');
+        }
+
+        $user->update(
+            ['password' => Hash::make($request->password)]
+        );
+
+        return response()->json([
+            'message' => 'Password successfully updated'
+        ], 201);
     }
 
     public function logout(Request $request)

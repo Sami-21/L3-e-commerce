@@ -26,6 +26,7 @@ class ProductController extends Controller
             'price' => $request->price,
             'features' => $request->features,
             'colors' => $request->colors,
+            'category_id' => $request->category_id,
             'rating' => 0,
         ]);
         //Upload the images
@@ -73,29 +74,29 @@ class ProductController extends Controller
         }
 
         $images = [];
-        foreach ($request->file('images') as $i => $image) {
-            if (!array_key_exists('id', $validated['images'][$i])) {
+        for ($i = 0; $i < count($validated['images']); ++$i) {
+            if (!array_key_exists('id', $validated['images'])) {
                 $destinationPath = 'public/images/products';
-                $imageName = Str::uuid() . "." . $image->clientExtension();
-                $image->storeAs($destinationPath, $imageName);
+                $imageName = Str::uuid() . "." . $validated['images'][$i]->clientExtension();
+                $validated['images'][$i]->storeAs($destinationPath, $imageName);
                 $images[$i] = [
                     'name' => $imageName,
                     'path' => $destinationPath . "/" . $imageName,
                 ];
             } else {
-                $images = Product::findOrFail($validated['images'][$i]['id']);
+                $image = Image::findOrFail($validated['images'][$i]['id']);
                 if (!empty($request->file('images')[$i])) {
-                    Storage::delete('images/products/' . $images->image);
+                    Storage::delete('images/products/' . $image);
                     $images_image = $request->file('images')[$i]['name'];
                     $destinationPath = 'images/products';
                     $imageName = Str::uuid() . "." . $images_image->getClientOriginalExtension();
                     $images_image->storeAs($destinationPath, $imageName);
-                    $images->update([
+                    $image->update([
                         'name' => $imageName,
                         'path' => $destinationPath . "/" . $imageName,
                     ]);
                 } else {
-                    $images->update([
+                    $image->update([
                         'path' => $validated['images'][$i]['path'],
                     ]);
                 }
