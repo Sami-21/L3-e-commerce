@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProductRequest;
 use App\Models\Image;
 use App\Models\Product;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use \Illuminate\Support\Str;
 
@@ -13,7 +14,28 @@ class ProductController extends Controller
 
     public function all()
     {
-        return Product::with('images')->get();
+        $products = Product::with('images')->get();
+        return response()->json($products, 200);
+    }
+
+    public function get($id)
+    {
+        $product = Product::with('images')->findOrFail($id);
+        if (!$product)
+            return response()->json(['message' => 'Product not found'], 404);
+        return response()->json($product, 200);
+    }
+
+    public function getByCategory($id)
+    {
+        $products = Product::where('category_id', $id)->with('images')->get();
+        return response()->json($products, 200);
+    }
+
+    public function search(Request $request)
+    {
+        $products = Product::where('name', 'like', '%' . $request->keyword . '%')->with('images')->get();
+        return response()->json($products, 200);
     }
 
     public function add(ProductRequest $request)
@@ -47,12 +69,6 @@ class ProductController extends Controller
             'message' => 'Product created successfully',
             'product' => $product
         ], 201);
-    }
-
-
-    public function get($id)
-    {
-        return Product::with('images')->find($id);
     }
 
     public function update(ProductRequest $request, $id)

@@ -61,6 +61,8 @@ Route::prefix('products')->group(function () {
     Route::get('/all', [ProductController::class, 'all']);
     Route::post('/add', [ProductController::class, 'add']);
     Route::get('/get/{id}', [ProductController::class, 'get']);
+    Route::get('/category/{id}', [ProductController::class, 'getByCategory']);
+    Route::get('/search', [ProductController::class, 'search']);
     Route::post('/update/{id}', [ProductController::class, 'update']);
     Route::patch('/changeStatus/{id}', [ProductController::class, 'changeStatus']);
     Route::delete('/{id}', [ProductController::class, 'destroy']);
@@ -71,6 +73,10 @@ Route::prefix('orders')->group(function () {
     Route::post('/add', [OrderController::class, 'add']);
     Route::get('/all', [OrderController::class, 'all']);
     Route::get('/get/{id}', [OrderController::class, 'get']);
+    Route::get('/client/get/{id}', [
+        OrderController::class,
+        'getClientOrders'
+    ]);
     Route::patch('/pend/{id}', [OrderController::class, 'pend']);
     Route::patch('/fulfill/{id}', [OrderController::class, 'fulfill']);
     Route::patch('/cancel/{id}', [OrderController::class, 'cancel']);

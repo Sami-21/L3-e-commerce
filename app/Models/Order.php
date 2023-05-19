@@ -12,6 +12,9 @@ class Order extends Model
 
     protected $fillable = [
         'client_id',
+        'firstname',
+        'lastname',
+        'delivery_date',
         'phone',
         'wilaya',
         'city',

@@ -16,13 +16,15 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->unsignedBigInteger('client_id');
-            $table->foreign('client_id')->references('id')->on('clients');
+            $table->unsignedBigInteger('client_id')->nullable(true);
+            $table->foreign('client_id')->default(null)->nullable(true)->references('id')->on('clients');
+            $table->string('firstname')->nullable(true);
+            $table->string('lastname')->nullable(true);
             $table->string('wilaya');
             $table->string('city');
             $table->string('address');
             $table->string('phone');
-            $table->date('delivery_date');
+            $table->string('delivery_date');
             $table->string('status')->default('pending')->nullable(false);
             $table->text('notes')->nullable();
             $table->double('total')->default(0.0);

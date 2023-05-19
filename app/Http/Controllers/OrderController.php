@@ -19,11 +19,17 @@ class OrderController extends Controller
         return response()->json($order, 200);
     }
 
+    public function getClientOrders($id)
+    {
+        $orders = Order::where('client_id', $id)->with('products')->get();
+        return response()->json($orders, 200);
+    }
+
     public function add(OrderRequest $request)
     {
-        $validated = $request->validated();
-        $order = Order::create($validated);
-        foreach ($validated['products'] as $product) {
+        $request->validated();
+        $order = Order::create($request->all());
+        foreach ($request['products'] as $product) {
             $order->products()->attach($product['id'], ['quantity' => $product['quantity'], 'price' => $product['price']]);
         }
         return response()->json(['message' => 'order created successfully', 'order' => $order], 201);

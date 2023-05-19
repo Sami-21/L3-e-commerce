@@ -24,14 +24,20 @@ class OrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'client_id' => 'required|exists:clients,id',
-            'address' => 'required|string',
-            'phone' => 'required|string',
-            'products' => 'required',
-            'products.*.id' => 'required|exists:products,id',
-            'products.*.quantity' => 'required|integer|min:1',
-            'products.*.price' => 'required|numeric|min:0',
-            'total' => 'required|numeric|min:0',
+            // 'client_id' => 'exists:clients,id',
+            // 'firstname' =>
+            // 'string',
+            // 'lastname' => 'string',
+            // 'address' => 'required|string',
+            // 'wilaya' => 'required|string',
+            // 'city' => 'required|string',
+            // 'delivery_date' => 'required|string',
+            // 'phone' => 'required|string',
+            // 'products' => 'required',
+            // 'products.*.id' => 'required|exists:products,id',
+            // 'products.*.quantity' => 'required|integer|min:1',
+            // 'products.*.price' => 'required|numeric|min:0',
+            // 'total' => 'required|numeric|min:0',
         ];
     }
 }
