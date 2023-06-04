@@ -29,9 +29,9 @@ class ProductRequest extends FormRequest
                 'price' => ['numeric', 'required'],
                 'features' => ['json', 'required'],
                 'colors' => ['json', 'required'],
+                'capacity' => ['json', 'required'],
                 'images' => ['required'],
                 'category_id' => ['required', 'exists:categories,id'],
-                // 'deleted_images' => ['array'],
             ];
     }
 }

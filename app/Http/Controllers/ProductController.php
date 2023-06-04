@@ -48,6 +48,7 @@ class ProductController extends Controller
             'price' => $request->price,
             'features' => $request->features,
             'colors' => $request->colors,
+            'capacity' => $request->capacity,
             'category_id' => $request->category_id,
             'rating' => 0,
         ]);

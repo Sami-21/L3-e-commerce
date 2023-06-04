@@ -14,6 +14,7 @@ class Product extends Model
         'name',
         'price',
         'features',
+        'capacity',
         'colors',
         'status'
     ];

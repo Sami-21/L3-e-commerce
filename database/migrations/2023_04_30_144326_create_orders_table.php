@@ -24,7 +24,6 @@ return new class extends Migration
             $table->string('city');
             $table->string('address');
             $table->string('phone');
-            $table->string('delivery_date');
             $table->string('status')->default('pending')->nullable(false);
             $table->text('notes')->nullable();
             $table->double('total')->default(0.0);

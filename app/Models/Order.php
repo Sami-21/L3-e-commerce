@@ -14,7 +14,6 @@ class Order extends Model
         'client_id',
         'firstname',
         'lastname',
-        'delivery_date',
         'phone',
         'wilaya',
         'city',

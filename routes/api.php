@@ -25,7 +25,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::middleware(['auth:sanctum', 'abilities:admin'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
-        Route::post('/changePassword/{id}', [AuthController::class, 'changePassword']);
+        Route::post('/changePassword', [AuthController::class, 'changePassword']);
     });
 
     //Client authentication routes

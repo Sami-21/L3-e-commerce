@@ -51,14 +51,14 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function changePassword(Request $request, $id)
+    public function changePassword(Request $request)
     {
         $request->validate([
             'current_password' => 'required|string|min:8',
             'password' => 'required|string|confirmed|min:8',
         ]);
 
-        $user = User::findOrFail($id);
+        $user = $request->user();
 
         if (!Hash::check($request->current_password, $user->password)) {
             return back()->with('error', 'Current password does not match !');
