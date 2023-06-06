@@ -63,7 +63,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('products')->group(function () {
         Route::get('/all', [ProductController::class, 'all']);
         Route::post('/add', [ProductController::class, 'add']);
-        Route::get('/get/{id}', [ProductController::class, 'get']);
         Route::get('/category/{id}', [ProductController::class, 'getByCategory']);
         Route::get('/search', [ProductController::class, 'search']);
         Route::put('/update/{id}', [ProductController::class, 'update']);
@@ -87,4 +86,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 Route::get('/categories/all', [CategoryController::class, 'all']);
-Route::post('orders/add', [OrderController::class, 'add']);
+Route::get('/products/get/{id}', [ProductController::class, 'get']);
+Route::post('/orders/add', [OrderController::class, 'add']);

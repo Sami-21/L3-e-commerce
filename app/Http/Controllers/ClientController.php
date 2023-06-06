@@ -89,14 +89,15 @@ class ClientController extends Controller
             ], 401);
         }
         $user = $request->user();
-        if ($user->status == false) {
+        $client = Client::with(['user'])->where('user_id', $user->id)->first();
+        if ($client->status == false) {
             return response()->json([
+                'status' => $client->status,
                 'message' => 'Your account is disabled',
             ], 401);
         }
         //Generate token
         $token = $user->createToken('auth_token')->plainTextToken;
-        $client = Client::with(['user'])->where('user_id', $user->id)->first();
         //Return client and token
         return response()->json([
             'client' => $client,
@@ -113,14 +114,14 @@ class ClientController extends Controller
             'password' => Hash::make($request->password),
             'role_id' => 2
         ]));
-        Client::create([
+        $client = Client::create([
             'user_id' => $user->id
         ]);
         //Generate token
         $token = $user->createToken('client_token', ['client'])->plainTextToken;
         //Return user and token
         return response()->json([
-            'user' => $user,
+            'client' => $client,
             'token' => $token
         ], 201);
     }
