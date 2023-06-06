@@ -11,7 +11,7 @@ class CategoryController extends Controller
     public function all()
     {
         return response()->json([
-            'categories' => Category::all()
+            'categories' => Category::with('products.images')->get()
         ]);
     }
 

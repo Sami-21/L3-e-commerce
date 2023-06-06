@@ -19,7 +19,7 @@ return new class extends Migration
             $table->double('price');
             $table->json('features');
             $table->json('colors');
-            $table->json('capacity');
+            $table->json('capacity')->nullable();
             $table->boolean('status')->default(true);
             $table->float('rating')->default(0.0);
             $table->unsignedBigInteger('category_id');

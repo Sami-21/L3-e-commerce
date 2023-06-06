@@ -23,7 +23,7 @@ Route::prefix('auth')->group(function () {
     //Admin authentication routes
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::middleware(['auth:sanctum', 'abilities:admin'])->group(function () {
+    Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/changePassword', [AuthController::class, 'changePassword']);
     });
@@ -36,49 +36,55 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-//Clients Routes
-Route::prefix('clients')->group(function () {
-    Route::get('/all', [ClientController::class, 'all']);
-    Route::get('/get/{id}', [ClientController::class, 'get']);
-    Route::get('/search', [ClientController::class, 'search']);
-    Route::patch('/changeStatus/{id}', [ClientController::class, 'changeStatus']);
-    Route::delete('/{id}', [ClientController::class, 'destroy']);
+//Admin Routes  
+Route::middleware(['auth:sanctum'])->group(function () {
+
+    //Clients Routes
+    Route::prefix('clients')->group(function () {
+        Route::get('/all', [ClientController::class, 'all']);
+        Route::get('/get/{id}', [ClientController::class, 'get']);
+        Route::get('/search', [ClientController::class, 'search']);
+        Route::patch('/changeStatus/{id}', [ClientController::class, 'changeStatus']);
+        Route::delete('/{id}', [ClientController::class, 'destroy']);
+    });
+
+    //Categories Routes
+    Route::prefix('categories')->group(function () {
+        // Route::get('/all', [CategoryController::class, 'all']);
+        Route::get('/get/{id}', [CategoryController::class, 'get']);
+        Route::get('/search', [CategoryController::class, 'search']);
+        Route::post('/add', [CategoryController::class, 'add']);
+        Route::post('/update/{id}', [CategoryController::class, 'update']);
+        Route::patch('/changeStatus/{id}', [CategoryController::class, 'changeStatus']);
+        Route::delete('/{id}', [CategoryController::class, 'destroy']);
+    });
+
+    //Products Routes 
+    Route::prefix('products')->group(function () {
+        Route::get('/all', [ProductController::class, 'all']);
+        Route::post('/add', [ProductController::class, 'add']);
+        Route::get('/get/{id}', [ProductController::class, 'get']);
+        Route::get('/category/{id}', [ProductController::class, 'getByCategory']);
+        Route::get('/search', [ProductController::class, 'search']);
+        Route::put('/update/{id}', [ProductController::class, 'update']);
+        Route::patch('/changeStatus/{id}', [ProductController::class, 'changeStatus']);
+        Route::delete('/{id}', [ProductController::class, 'destroy']);
+    });
+
+    //Orders Routes
+    Route::prefix('orders')->group(function () {
+        Route::get('/all', [OrderController::class, 'all']);
+        Route::get('/get/{id}', [OrderController::class, 'get']);
+        Route::get('/client/get/{id}', [
+            OrderController::class,
+            'getClientOrders'
+        ]);
+        Route::patch('/pend/{id}', [OrderController::class, 'pend']);
+        Route::patch('/fulfill/{id}', [OrderController::class, 'fulfill']);
+        Route::patch('/cancel/{id}', [OrderController::class, 'cancel']);
+        Route::delete('/{id}', [OrderController::class, 'destroy']);
+    });
 });
 
-//Categories Routes
-Route::prefix('categories')->group(function () {
-    Route::get('/all', [CategoryController::class, 'all']);
-    Route::get('/get/{id}', [CategoryController::class, 'get']);
-    Route::get('/search', [CategoryController::class, 'search']);
-    Route::post('/add', [CategoryController::class, 'add']);
-    Route::put('/update/{id}', [CategoryController::class, 'update']);
-    Route::patch('/changeStatus/{id}', [CategoryController::class, 'changeStatus']);
-    Route::delete('/{id}', [CategoryController::class, 'destroy']);
-});
-
-//Products Routes 
-Route::prefix('products')->group(function () {
-    Route::get('/all', [ProductController::class, 'all']);
-    Route::post('/add', [ProductController::class, 'add']);
-    Route::get('/get/{id}', [ProductController::class, 'get']);
-    Route::get('/category/{id}', [ProductController::class, 'getByCategory']);
-    Route::get('/search', [ProductController::class, 'search']);
-    Route::post('/update/{id}', [ProductController::class, 'update']);
-    Route::patch('/changeStatus/{id}', [ProductController::class, 'changeStatus']);
-    Route::delete('/{id}', [ProductController::class, 'destroy']);
-});
-
-//Orders Routes
-Route::prefix('orders')->group(function () {
-    Route::post('/add', [OrderController::class, 'add']);
-    Route::get('/all', [OrderController::class, 'all']);
-    Route::get('/get/{id}', [OrderController::class, 'get']);
-    Route::get('/client/get/{id}', [
-        OrderController::class,
-        'getClientOrders'
-    ]);
-    Route::patch('/pend/{id}', [OrderController::class, 'pend']);
-    Route::patch('/fulfill/{id}', [OrderController::class, 'fulfill']);
-    Route::patch('/cancel/{id}', [OrderController::class, 'cancel']);
-    Route::delete('/{id}', [OrderController::class, 'destroy']);
-});
+Route::get('/categories/all', [CategoryController::class, 'all']);
+Route::post('orders/add', [OrderController::class, 'add']);

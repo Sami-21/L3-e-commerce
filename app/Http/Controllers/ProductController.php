@@ -49,15 +49,15 @@ class ProductController extends Controller
             'features' => $request->features,
             'colors' => $request->colors,
             'capacity' => $request->capacity,
-            'category_id' => $request->category_id,
             'rating' => 0,
+            'category_id' => $request->category_id,
         ]);
         //Upload the images
         $images = [];
         foreach ($request->file('images') as $i => $image) {
-            $destinationPath = 'public/images/products';
+            $destinationPath = 'images/products';
             $imageName = Str::uuid() . "." . $image->clientExtension();
-            $image->storeAs($destinationPath, $imageName);
+            $image->move($destinationPath, $imageName);
             $images[$i] = [
                 'name' => $imageName,
                 'path' => $destinationPath . "/" . $imageName,
@@ -84,8 +84,8 @@ class ProductController extends Controller
 
         if (array_key_exists('deleted_images', $validated) && count($validated['deleted_images'])) {
             foreach ($validated['deleted_images'] as $src) {
-                $deleted_images = Image::findOrFail($src['id']);
-                Storage::delete('images/products/' . $deleted_images->name);
+                $deleted_images = Image::findOrFail($src);
+                unlink($deleted_images->path);
                 $deleted_images->delete();
             }
         }
@@ -93,9 +93,9 @@ class ProductController extends Controller
         $images = [];
         for ($i = 0; $i < count($validated['images']); ++$i) {
             if (!array_key_exists('id', $validated['images'])) {
-                $destinationPath = 'public/images/products';
+                $destinationPath = 'images/products';
                 $imageName = Str::uuid() . "." . $validated['images'][$i]->clientExtension();
-                $validated['images'][$i]->storeAs($destinationPath, $imageName);
+                $validated['images'][$i]->move($destinationPath, $imageName);
                 $images[$i] = [
                     'name' => $imageName,
                     'path' => $destinationPath . "/" . $imageName,
@@ -103,11 +103,11 @@ class ProductController extends Controller
             } else {
                 $image = Image::findOrFail($validated['images'][$i]['id']);
                 if (!empty($request->file('images')[$i])) {
-                    Storage::delete('images/products/' . $image);
+                    unlink('images/products/' . $image);
                     $images_image = $request->file('images')[$i]['name'];
                     $destinationPath = 'images/products';
                     $imageName = Str::uuid() . "." . $images_image->getClientOriginalExtension();
-                    $images_image->storeAs($destinationPath, $imageName);
+                    $images_image->move($destinationPath, $imageName);
                     $image->update([
                         'name' => $imageName,
                         'path' => $destinationPath . "/" . $imageName,
