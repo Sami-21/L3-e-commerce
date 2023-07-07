@@ -20,7 +20,7 @@ class ProductController extends Controller
 
     public function get($id)
     {
-        $product = Product::with('images')->findOrFail($id);
+        $product = Product::with(['category', 'images'])->findOrFail($id);
         if (!$product)
             return response()->json(['message' => 'Product not found'], 404);
         return response()->json($product, 200);

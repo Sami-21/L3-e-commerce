@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
+use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -15,20 +17,29 @@ class ProductFactory extends Factory
 
     public function definition()
     {
+        $categories = Category::get();
         return [
             'name' => $this->faker->word,
-            'price' => $this->faker->price(10, 1000),
-            'colors' => $this->faker->randomElements([
+            'price' => $this->faker->randomFloat(2, 10, 1000),
+            'colors' => json_encode($this->faker->randomElements([
                 'red', 'black', 'white', 'green', 'blue', 'rgb', 'yellow',
                 'orange'
-            ], 3),
-            'features' => $this->faker->randomElements(['feature1', 'feature2', 'feature3', 'feature4', 'feature5', 'feature6', 'feature7', 'feature8'], 5),
-            'capacity' => $this->faker->randomElements([
+            ], 3)),
+            'features' => json_encode($this->faker->randomElements(['feature1', 'feature2', 'feature3', 'feature4', 'feature5', 'feature6', 'feature7', 'feature8'], 5)),
+            'capacity' => json_encode($this->faker->randomElements([
                 '128GB', '256GB', '512GB', '1TB', '2TB', '10TB'
-            ], 3),
+            ], 3)),
             'status' => $this->faker->boolean,
-            'rating' => $this->faker->randomFloat(2, 0, 0),
-            'category_id' => Category::factory()->create()->id,
+            'rating' => $this->faker->randomFloat(2, 0, 5),
+            'category_id' => $this->faker->randomElement($categories)->id
+
         ];
+    }
+
+    public function configure()
+    {
+        return $this->afterCreating(function (Product $product) {
+            $product->orders()->attach(Order::factory()->create());
+        });
     }
 }
