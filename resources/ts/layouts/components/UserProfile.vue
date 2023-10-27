@@ -1,5 +1,32 @@
 <script setup lang="ts">
-import avatar1 from '@images/avatars/avatar-1.png';
+import { useAuthenticationStore } from "@/@core/store/AuthenticationStore";
+import avatar1 from "@images/avatars/avatar-1.png";
+const AuthenticationStore = useAuthenticationStore();
+
+const router = useRouter();
+
+const userData = JSON.parse(localStorage.getItem("authUser") ?? "");
+
+const snackbar = ref({
+  isVisible: false,
+  message: "",
+  color: "",
+});
+
+const logout = () => {
+  AuthenticationStore.logout()
+    .then((response) => {
+      localStorage.removeItem("authUser");
+      router.push({
+        path: "/login",
+      });
+    })
+    .catch((error) => {
+      snackbar.value.isVisible = true;
+      snackbar.value.message = error.message;
+      snackbar.value.color = "error";
+    });
+};
 </script>
 
 <template>
@@ -11,20 +38,18 @@ import avatar1 from '@images/avatars/avatar-1.png';
     color="success"
     bordered
   >
-    <VAvatar
-      class="cursor-pointer"
-      color="primary"
-      variant="tonal"
+    <v-snackbar
+      v-model="snackbar.isVisible"
+      :color="snackbar.color"
+      :timeout="2000"
     >
+      {{ snackbar.message }}
+    </v-snackbar>
+    <VAvatar class="cursor-pointer" color="primary" variant="tonal">
       <VImg :src="avatar1" />
 
       <!-- SECTION Menu -->
-      <VMenu
-        activator="parent"
-        width="230"
-        location="bottom end"
-        offset="14px"
-      >
+      <VMenu activator="parent" width="230" location="bottom end" offset="14px">
         <VList>
           <!-- 👉 User Avatar & Name -->
           <VListItem>
@@ -37,10 +62,7 @@ import avatar1 from '@images/avatars/avatar-1.png';
                   offset-y="3"
                   color="success"
                 >
-                  <VAvatar
-                    color="primary"
-                    variant="tonal"
-                  >
+                  <VAvatar color="primary" variant="tonal">
                     <VImg :src="avatar1" />
                   </VAvatar>
                 </VBadge>
@@ -48,75 +70,28 @@ import avatar1 from '@images/avatars/avatar-1.png';
             </template>
 
             <VListItemTitle class="font-weight-semibold">
-              John Doe
+              {{ userData.user.firstname + " " + userData.user.lastname }}
             </VListItemTitle>
             <VListItemSubtitle>Admin</VListItemSubtitle>
           </VListItem>
           <VDivider class="my-2" />
 
           <!-- 👉 Profile -->
-          <VListItem link>
+          <VListItem link to="/account-settings">
             <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="mdi-account-outline"
-                size="22"
-              />
+              <VIcon class="me-2" icon="mdi-account-outline" size="22" />
             </template>
 
             <VListItemTitle>Profile</VListItemTitle>
-          </VListItem>
-
-          <!-- 👉 Settings -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="mdi-cog-outline"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>Settings</VListItemTitle>
-          </VListItem>
-
-          <!-- 👉 Pricing -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="mdi-currency-usd"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>Pricing</VListItemTitle>
-          </VListItem>
-
-          <!-- 👉 FAQ -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="mdi-help-circle-outline"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>FAQ</VListItemTitle>
           </VListItem>
 
           <!-- Divider -->
           <VDivider class="my-2" />
 
           <!-- 👉 Logout -->
-          <VListItem to="/login">
+          <VListItem @click="logout">
             <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="mdi-logout"
-                size="22"
-              />
+              <VIcon class="me-2" icon="mdi-logout" size="22" />
             </template>
 
             <VListItemTitle>Logout</VListItemTitle>

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductRequest;
+use App\Http\Resources\ProductCollection;
+use App\Http\Resources\ProductResource;
 use App\Models\Image;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -12,10 +14,12 @@ use \Illuminate\Support\Str;
 class ProductController extends Controller
 {
 
-    public function all()
+    public function all(Request $request)
     {
-        $products = Product::with('images')->get();
-        return response()->json($products, 200);
+        $products = Product::with('images')->where('name', 'LIKE', '%' . $request->q . '%')->whereHas('category', function ($q) use ($request) {
+            $q->where('name', 'LIKE', '%' . $request->category . '%');
+        })->paginate($request->perPage);
+        return response()->json(new ProductCollection($products), 200);
     }
 
     public function get($id)
@@ -23,20 +27,9 @@ class ProductController extends Controller
         $product = Product::with(['category', 'images'])->findOrFail($id);
         if (!$product)
             return response()->json(['message' => 'Product not found'], 404);
-        return response()->json($product, 200);
+        return response()->json(new ProductResource($product), 200);
     }
 
-    public function getByCategory($id)
-    {
-        $products = Product::where('category_id', $id)->with('images')->get();
-        return response()->json($products, 200);
-    }
-
-    public function search(Request $request)
-    {
-        $products = Product::where('name', 'like', '%' . $request->keyword . '%')->with('images')->get();
-        return response()->json($products, 200);
-    }
 
     public function add(ProductRequest $request)
     {
@@ -46,9 +39,8 @@ class ProductController extends Controller
         $product = Product::create([
             'name' => $request->name,
             'price' => $request->price,
+            'promotion_price' => $request->promotion_price,
             'features' => $request->features,
-            'colors' => $request->colors,
-            'capacity' => $request->capacity,
             'rating' => 0,
             'category_id' => $request->category_id,
         ]);
@@ -68,7 +60,7 @@ class ProductController extends Controller
         //Return the response
         return response()->json([
             'message' => 'Product created successfully',
-            'product' => $product
+            'product' => new ProductResource($product)
         ], 201);
     }
 
@@ -126,7 +118,7 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'product updated successfully',
-            $product
+            new ProductResource($product)
         ], 201);
     }
 

@@ -7,13 +7,15 @@ import authV1MaskDark from "@images/pages/auth-v1-mask-dark.png";
 import authV1MaskLight from "@images/pages/auth-v1-mask-light.png";
 import authV1Tree2 from "@images/pages/auth-v1-tree-2.png";
 import authV1Tree from "@images/pages/auth-v1-tree.png";
+import { useAuthenticationStore } from "@core/store/AuthenticationStore";
 
+const router = useRouter();
+const AuthenticationStore = useAuthenticationStore();
 const form = ref({
   email: "",
   password: "",
-  remember: false,
 });
-
+const formRef = ref();
 const vuetifyTheme = useTheme();
 const authThemeMask = computed(() => {
   return vuetifyTheme.global.name.value === "light"
@@ -21,12 +23,54 @@ const authThemeMask = computed(() => {
     : authV1MaskDark;
 });
 
+const rules = {
+  required: (value: any) => !!value || "Required.",
+  email: (value: any) => {
+    const pattern =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return pattern.test(value) || "Invalid e-mail.";
+  },
+};
+
 const isPasswordVisible = ref(false);
+const snackbar = ref({
+  isVisible: false,
+  message: "",
+  color: "",
+});
+
+const handleSubmit = () => {
+  formRef.value?.validate().then(async ({ valid }) => {
+    if (valid) {
+      AuthenticationStore.login(form.value)
+        .then((response) => {
+          const { data } = response;
+          localStorage.setItem("authUser", JSON.stringify(data));
+
+          router.push("/dashboard");
+        })
+        .catch((error) => {
+          const { message } = error.response.data;
+
+          snackbar.value.isVisible = true;
+          snackbar.value.message = message;
+          snackbar.value.color = "error";
+        });
+    }
+  });
+};
 </script>
 
 <template>
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
-    <VCard class="auth-card pa-4 pt-7" max-width="448">
+    <v-snackbar
+      v-model="snackbar.isVisible"
+      :color="snackbar.color"
+      :timeout="2000"
+    >
+      {{ snackbar.message }}
+    </v-snackbar>
+    <VCard class="auth-card pa-4 pt-7">
       <VCardItem class="justify-center">
         <template #prepend>
           <div class="d-flex">
@@ -49,11 +93,16 @@ const isPasswordVisible = ref(false);
       </VCardText>
 
       <VCardText>
-        <VForm @submit.prevent="() => {}">
+        <VForm ref="formRef" @submit.prevent="handleSubmit">
           <VRow>
             <!-- email -->
             <VCol cols="12">
-              <VTextField v-model="form.email" label="Email" type="email" />
+              <VTextField
+                v-model="form.email"
+                label="Email"
+                type="email"
+                :rules="[rules.required, rules.email]"
+              />
             </VCol>
 
             <!-- password -->
@@ -61,6 +110,7 @@ const isPasswordVisible = ref(false);
               <VTextField
                 v-model="form.password"
                 label="Password"
+                :rules="[rules.required]"
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :append-inner-icon="
                   isPasswordVisible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'
@@ -71,35 +121,10 @@ const isPasswordVisible = ref(false);
               <!-- remember me checkbox -->
               <div
                 class="d-flex align-center justify-space-between flex-wrap mt-1 mb-4"
-              >
-                <VCheckbox v-model="form.remember" label="Remember me" />
-
-                <a class="ms-2 mb-1" href="javascript:void(0)">
-                  Forgot Password?
-                </a>
-              </div>
+              ></div>
 
               <!-- login button -->
-              <VBtn block type="submit" to="/"> Login </VBtn>
-            </VCol>
-
-            <!-- create account -->
-            <VCol cols="12" class="text-center text-base">
-              <span>New on our platform?</span>
-              <RouterLink class="text-primary ms-2" to="/register">
-                Create an account
-              </RouterLink>
-            </VCol>
-
-            <VCol cols="12" class="d-flex align-center">
-              <VDivider />
-              <span class="mx-4">or</span>
-              <VDivider />
-            </VCol>
-
-            <!-- auth providers -->
-            <VCol cols="12" class="text-center">
-              <AuthProvider />
+              <VBtn block type="submit"> Login </VBtn>
             </VCol>
           </VRow>
         </VForm>

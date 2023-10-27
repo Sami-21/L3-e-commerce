@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Enums\OrderStatusEnum;
 use App\Http\Requests\OrderRequest;
+use App\Http\Resources\OrderCollection;
 use App\Models\Order;
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function all()
+    public function all(Request $request)
     {
-        return response()->json(Order::with('products')->get(), 200);
+        $orders = Order::with('products')->where('address', 'LIKE', '%' . $request->q . '%')->where('wilaya', 'LIKE', '%' . $request->wilaya . '%')->orderBy('created_at', 'desc')->paginate($request->perPage);
+        return response()->json(new OrderCollection($orders), 200);
     }
 
     public function get($id)

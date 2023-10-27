@@ -11,48 +11,117 @@ const router = createRouter({
                 {
                     path: "dashboard",
                     component: () => import("../pages/dashboard.vue"),
+                    meta: { requiredAuth: true },
+                    beforeEnter: (to, from, next) => {
+                        // Check if the user is authenticated
+                        const isAuthenticated =
+                            localStorage.getItem("authUser");
+
+                        if (isAuthenticated) {
+                            // If the user is authenticated, allow access to the route
+                            next();
+                        } else {
+                            // If not authenticated, redirect to the login page
+                            next("/login");
+                        }
+                    },
                 },
                 {
                     path: "account-settings",
                     component: () => import("../pages/account-settings.vue"),
-                },
-                {
-                    path: "typography",
-                    component: () => import("../pages/typography.vue"),
+                    meta: { requiredAuth: true },
+                    beforeEnter: (to, from, next) => {
+                        // Check if the user is authenticated
+                        const isAuthenticated =
+                            localStorage.getItem("authUser");
+
+                        if (isAuthenticated) {
+                            // If the user is authenticated, allow access to the route
+                            next();
+                        } else {
+                            // If not authenticated, redirect to the login page
+                            next("/login");
+                        }
+                    },
                 },
                 {
                     path: "clients",
                     component: () => import("../pages/clients.vue"),
+                    meta: { requiredAuth: true },
+                    beforeEnter: (to, from, next) => {
+                        // Check if the user is authenticated
+                        const isAuthenticated =
+                            localStorage.getItem("authUser");
+
+                        if (isAuthenticated) {
+                            // If the user is authenticated, allow access to the route
+                            next();
+                        } else {
+                            // If not authenticated, redirect to the login page
+                            next("/login");
+                        }
+                    },
                 },
                 {
-                    path: "icons",
-                    component: () => import("../pages/icons.vue"),
+                    path: "products",
+                    component: () => import("../pages/products.vue"),
+                    meta: { requiredAuth: true },
+                    beforeEnter: (to, from, next) => {
+                        // Check if the user is authenticated
+                        const isAuthenticated =
+                            localStorage.getItem("authUser");
+
+                        if (isAuthenticated) {
+                            // If the user is authenticated, allow access to the route
+                            next();
+                        } else {
+                            // If not authenticated, redirect to the login page
+                            next("/login");
+                        }
+                    },
                 },
                 {
-                    path: "cards",
-                    component: () => import("../pages/cards.vue"),
-                },
-                {
-                    path: "tables",
-                    component: () => import("../pages/tables.vue"),
-                },
-                {
-                    path: "form-layouts",
-                    component: () => import("../pages/form-layouts.vue"),
+                    path: "orders",
+                    component: () => import("../pages/orders.vue"),
+                    meta: { requiredAuth: true },
+                    beforeEnter: (to, from, next) => {
+                        // Check if the user is authenticated
+                        const isAuthenticated =
+                            localStorage.getItem("authUser");
+
+                        if (isAuthenticated) {
+                            // If the user is authenticated, allow access to the route
+                            next();
+                        } else {
+                            // If not authenticated, redirect to the login page
+                            next("/login");
+                        }
+                    },
                 },
             ],
         },
         {
-            path: "/",
+            path: "/login", // Change the path to /login
             component: () => import("../layouts/blank.vue"),
             children: [
                 {
-                    path: "login",
+                    path: "",
                     component: () => import("../pages/login.vue"),
-                },
-                {
-                    path: "register",
-                    component: () => import("../pages/register.vue"),
+                    meta: { requiredAuth: true },
+                    beforeEnter: (to, from, next) => {
+                        // Check if the user is authenticated
+                        const isAuthenticated =
+                            localStorage.getItem("authUser");
+
+                        if (isAuthenticated) {
+                            // If the user is authenticated, allow access to the route
+
+                            next("/dashboard");
+                        } else {
+                            // If not authenticated, redirect to the login page
+                            next();
+                        }
+                    },
                 },
                 {
                     path: "/:pathMatch(.*)*",

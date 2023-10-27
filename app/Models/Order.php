@@ -27,6 +27,12 @@ class Order extends Model
     {
         return $this->belongsToMany(Product::class)->withPivot(['quantity', 'price']);
     }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
     protected $casts = [
         'status' => OrderStatusEnum::class
     ];

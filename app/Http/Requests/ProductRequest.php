@@ -28,9 +28,8 @@ class ProductRequest extends FormRequest
                 return [
                     'name' => ['string', 'required', 'max:255'],
                     'price' => ['numeric', 'required'],
+                    'promotion_price' => ['numeric', 'nullable'],
                     'features' => ['json', 'required'],
-                    'colors' => ['json', 'required'],
-                    'capacity' => ['json', 'required'],
                     'images' => ['required'],
                     'category_id' => ['required']
                 ];
@@ -38,9 +37,8 @@ class ProductRequest extends FormRequest
                 return [
                     'name' => ['string', 'required', 'max:255'],
                     'price' => ['numeric', 'required'],
+                    'promotion_price' => ['numeric', 'required'],
                     'features' => ['json', 'required'],
-                    'colors' => ['json', 'required'],
-                    'capacity' => ['json', 'required'],
                     'images' => ['required'],
                     'category_id' => ['required'],
                     'deleted_images' => ['array'],

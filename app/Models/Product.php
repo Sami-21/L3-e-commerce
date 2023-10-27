@@ -13,9 +13,8 @@ class Product extends Model
         'category_id',
         'name',
         'price',
+        'promotion_price',
         'features',
-        'capacity',
-        'colors',
         'status'
     ];
 

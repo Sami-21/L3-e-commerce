@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ClientRequest;
+use App\Http\Resources\ClientCollection;
+use App\Http\Resources\ClientResource;
 use App\Models\Client;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -11,12 +13,25 @@ use Illuminate\Support\Facades\Hash;
 
 class ClientController extends Controller
 {
-    public function all()
+    public function index(Request $request)
     {
-        $clients = Client::with(['user'])->get();
-        return response()->json([
-            'clients' => $clients
-        ], 200);
+        $clients = Client::with(['user'])->whereHas('user', function ($query) use ($request) {
+            $query->where('firstname', 'LIKE', '%' . $request->q . '%');
+        })->orWhereHas(
+            'user',
+            function ($query) use ($request) {
+                $query->where('lastname', 'LIKE', '%' . $request->q . '%');
+            }
+        )->orWhereHas(
+            'user',
+            function ($query) use ($request) {
+                $query->where('email', 'LIKE', '%' . $request->q . '%');
+            }
+        )->paginate($request->perPage);
+        return response()->json(
+            new ClientCollection($clients),
+            200
+        );
     }
 
     public function get($id)
@@ -24,23 +39,13 @@ class ClientController extends Controller
         $client = Client::with(['user'])->findOrFail($id);
         if ($client) {
             return response()->json([
-                'client' => $client
+                'client' => new ClientResource($client)
             ], 200);
         } else {
             return response()->json([
                 'message' => 'Client not found'
             ], 404);
         }
-    }
-
-    public function search(Request $request)
-    {
-        $clients = Client::with(['user'])->whereHas('user', function ($query) use ($request) {
-            $query->where('firstname', 'like', '%' . $request->keyword . '%')->orWhere('lastname', 'like', '%' . $request->keyword . '%')->orWhere('email', 'like', '%' . $request->keyword . '%');
-        })->get();
-        return response()->json([
-            'clients' => $clients
-        ], 200);
     }
 
     public function changeStatus($id)
@@ -50,7 +55,7 @@ class ClientController extends Controller
             $client->status = !$client->status;
             $client->save();
             return response()->json([
-                'client' => $client
+                'client' => new ClientResource($client)
             ], 200);
         } else {
             return response()->json([
@@ -100,7 +105,7 @@ class ClientController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
         //Return client and token
         return response()->json([
-            'client' => $client,
+            'client' => new ClientResource($client),
             'token' => $token
         ], 200);
     }
@@ -121,7 +126,7 @@ class ClientController extends Controller
         $token = $user->createToken('client_token', ['client'])->plainTextToken;
         //Return user and token
         return response()->json([
-            'client' => $client,
+            'client' => new ClientResource($client),
             'token' => $token
         ], 201);
     }

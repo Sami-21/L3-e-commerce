@@ -116,22 +116,6 @@ const upgradeBanner = computed(() => {
     />
   </ul>
 
-  <!-- 👉 illustration -->
-  <a
-    href="https://themeselection.com/item/materio-vuetify-laravel-admin-template"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <img
-      :src="upgradeBanner"
-      alt="upgrade-banner"
-      transition="scale-transition"
-      class="upgrade-banner mx-auto"
-      style="max-width: 230px"
-    />
-  </a>
-</template>
-
 <style lang="scss">
 // .v-navigation-drawer {
 //   height: 100%;

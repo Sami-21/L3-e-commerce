@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
@@ -26,7 +27,8 @@ Route::prefix('auth')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/changePassword', [AuthController::class, 'changePassword']);
-        Route::get('/user', [AuthController::class, 'get']);
+        Route::post('/changeUserData', [AuthController::class, 'changeUserData']);
+        Route::get('/currentUser', [AuthController::class, 'get']);
     });
 
     //Client authentication routes
@@ -40,11 +42,18 @@ Route::prefix('auth')->group(function () {
 //Admin Routes  
 Route::middleware(['auth:sanctum'])->group(function () {
 
+    //Dashboard Routes
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/', [DashboardController::class, 'getVisitorsCount']);
+    });
+
     //Clients Routes
     Route::prefix('clients')->group(function () {
-        Route::get('/all', [ClientController::class, 'all']);
+        Route::get(
+            '/all',
+            [ClientController::class, 'index']
+        );
         Route::get('/get/{id}', [ClientController::class, 'get']);
-        Route::get('/search', [ClientController::class, 'search']);
         Route::patch('/changeStatus/{id}', [ClientController::class, 'changeStatus']);
         Route::delete('/{id}', [ClientController::class, 'destroy']);
     });
@@ -65,7 +74,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/all', [ProductController::class, 'all']);
         Route::post('/add', [ProductController::class, 'add']);
         Route::get('/category/{id}', [ProductController::class, 'getByCategory']);
-        Route::get('/search', [ProductController::class, 'search']);
         Route::put('/update/{id}', [ProductController::class, 'update']);
         Route::patch('/changeStatus/{id}', [ProductController::class, 'changeStatus']);
         Route::delete('/{id}', [ProductController::class, 'destroy']);

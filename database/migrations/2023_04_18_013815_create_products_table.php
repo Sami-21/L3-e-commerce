@@ -18,8 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->double('price');
             $table->json('features');
-            $table->json('colors');
-            $table->json('capacity')->nullable();
+            $table->double('promotion_price')->nullable();
             $table->boolean('status')->default(true);
             $table->float('rating')->default(0.0);
             $table->unsignedBigInteger('category_id');

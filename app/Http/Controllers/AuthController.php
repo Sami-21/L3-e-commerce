@@ -43,7 +43,7 @@ class AuthController extends Controller
             'role_id' => 1
         ]));
         //Generate token
-        $token = $user->createToken('admin', ['admin'])->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
         //Return user and token
         return response()->json([
             'user' => $user,
@@ -61,7 +61,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         if (!Hash::check($request->current_password, $user->password)) {
-            return back()->with('error', 'Current password does not match !');
+            return response()->json(['error' => 'Current password does not match !'], 400);
         }
 
         $user->update(
@@ -73,10 +73,34 @@ class AuthController extends Controller
         ], 201);
     }
 
+    public function changeUserData(Request $request)
+    {
+        $request->validate([
+            'firstname' => 'required|string|min:3',
+            'lastname' => 'required|string|min:3',
+            'email' => 'required|email|unique:users,email,' . auth()->id(),
+        ]);
+
+        $user = $request->user();
+
+        $user->update(
+            [
+                'firstname' => $request->firstname,
+                'lastname' => $request->lastname,
+                'email' => $request->email,
+            ]
+        );
+
+        return response()->json([
+            'message' => 'User successfully updated',
+            'user' => $request->user(),
+        ], 201);
+    }
+
     public function logout(Request $request)
     {
         //Delete token
-        $request->user()->currentAccessToken()->delete();
+        $request->user()->tokens()->delete();
         //Return success message
         return response()->json([
             'status' => 'success',
@@ -86,6 +110,8 @@ class AuthController extends Controller
 
     public function get(Request $request)
     {
-        return $request->user();
+        return response()->json([
+            'user' => $request->user(),
+        ]);
     }
 }

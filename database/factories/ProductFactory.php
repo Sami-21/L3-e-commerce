@@ -21,14 +21,10 @@ class ProductFactory extends Factory
         return [
             'name' => $this->faker->word,
             'price' => $this->faker->randomFloat(2, 10, 1000),
-            'colors' => json_encode($this->faker->randomElements([
-                'red', 'black', 'white', 'green', 'blue', 'rgb', 'yellow',
-                'orange'
-            ], 3)),
+            'promotion_price' => $this->faker->randomFloat(2, 10, 1000),
+
             'features' => json_encode($this->faker->randomElements(['feature1', 'feature2', 'feature3', 'feature4', 'feature5', 'feature6', 'feature7', 'feature8'], 5)),
-            'capacity' => json_encode($this->faker->randomElements([
-                '128GB', '256GB', '512GB', '1TB', '2TB', '10TB'
-            ], 3)),
+
             'status' => $this->faker->boolean,
             'rating' => $this->faker->randomFloat(2, 0, 5),
             'category_id' => $this->faker->randomElement($categories)->id
