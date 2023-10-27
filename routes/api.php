@@ -44,7 +44,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     //Dashboard Routes
     Route::prefix('dashboard')->group(function () {
-        Route::get('/', [DashboardController::class, 'getVisitorsCount']);
+        Route::get('/', [DashboardController::class, 'getStats']);
     });
 
     //Clients Routes

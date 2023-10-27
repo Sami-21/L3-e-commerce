@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import AuthProvider from "@/views/pages/authentication/AuthProvider.vue";
 import { useTheme } from "vuetify";
 
-import logo from "@images/logo.svg?raw";
 import authV1MaskDark from "@images/pages/auth-v1-mask-dark.png";
 import authV1MaskLight from "@images/pages/auth-v1-mask-light.png";
 import authV1Tree2 from "@images/pages/auth-v1-tree-2.png";
@@ -17,11 +15,6 @@ const form = ref({
 });
 const formRef = ref();
 const vuetifyTheme = useTheme();
-const authThemeMask = computed(() => {
-  return vuetifyTheme.global.name.value === "light"
-    ? authV1MaskLight
-    : authV1MaskDark;
-});
 
 const rules = {
   required: (value: any) => !!value || "Required.",
@@ -62,7 +55,7 @@ const handleSubmit = () => {
 </script>
 
 <template>
-  <div class="auth-wrapper d-flex align-center justify-center pa-4">
+  <div class="page-container">
     <v-snackbar
       v-model="snackbar.isVisible"
       :color="snackbar.color"
@@ -70,14 +63,8 @@ const handleSubmit = () => {
     >
       {{ snackbar.message }}
     </v-snackbar>
-    <VCard class="auth-card pa-4 pt-7">
+    <VCard class="pa-4 pt-7" max-width="450" max-height="450">
       <VCardItem class="justify-center">
-        <template #prepend>
-          <div class="d-flex">
-            <div v-html="logo" />
-          </div>
-        </template>
-
         <VCardTitle class="font-weight-semibold text-2xl text-uppercase">
           Daradji Telecom
         </VCardTitle>
@@ -85,11 +72,8 @@ const handleSubmit = () => {
 
       <VCardText class="pt-2">
         <h5 class="text-h5 font-weight-semibold mb-1">
-          Welcome to Daradji Telecom! 👋🏻
+          Welcome to Daradji Telecom!
         </h5>
-        <p class="mb-0">
-          Please sign-in to your account and start the adventure
-        </p>
       </VCardText>
 
       <VCardText>
@@ -118,7 +102,6 @@ const handleSubmit = () => {
                 @click:append-inner="isPasswordVisible = !isPasswordVisible"
               />
 
-              <!-- remember me checkbox -->
               <div
                 class="d-flex align-center justify-space-between flex-wrap mt-1 mb-4"
               ></div>
@@ -130,24 +113,18 @@ const handleSubmit = () => {
         </VForm>
       </VCardText>
     </VCard>
-
-    <VImg
-      class="auth-footer-start-tree d-none d-md-block"
-      :src="authV1Tree"
-      :width="250"
-    />
-
-    <VImg
-      :src="authV1Tree2"
-      class="auth-footer-end-tree d-none d-md-block"
-      :width="350"
-    />
-
-    <!-- bg img -->
-    <VImg class="auth-footer-mask d-none d-md-block" :src="authThemeMask" />
   </div>
 </template>
 
 <style lang="scss">
 @use "@core-scss/pages/page-auth.scss";
+
+.page-container {
+  height: 100vh;
+  max-width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 </style>
