@@ -30,7 +30,8 @@ class ProductRequest extends FormRequest
                     'price' => ['numeric', 'required'],
                     'promotion_price' => ['numeric', 'nullable'],
                     'features' => ['json', 'required'],
-                    'images' => ['required'],
+                    'images' => ['required', 'array'],
+                    'images.*' => ['image', 'mimes:jpeg,png,gif'],
                     'category_id' => ['required']
                 ];
             case "PUT":
@@ -39,7 +40,7 @@ class ProductRequest extends FormRequest
                     'price' => ['numeric', 'required'],
                     'promotion_price' => ['numeric', 'required'],
                     'features' => ['json', 'required'],
-                    'images' => ['required'],
+                    'images' => ['required', 'array'],
                     'category_id' => ['required'],
                     'deleted_images' => ['array'],
                 ];

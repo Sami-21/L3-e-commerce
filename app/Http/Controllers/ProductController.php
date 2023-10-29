@@ -27,12 +27,21 @@ class ProductController extends Controller
         $product = Product::with(['category', 'images'])->findOrFail($id);
         if (!$product)
             return response()->json(['message' => 'Product not found'], 404);
+
         return response()->json(new ProductResource($product), 200);
     }
 
+    public function getImages($id)
+    {
+        $images = Image::where('product_id', $id)->get();
+        return response()->json([
+            'images' => $images
+        ]);
+    }
 
     public function add(ProductRequest $request)
     {
+
         //Validate the request
         $request->validated();
         //Create the product
@@ -47,12 +56,11 @@ class ProductController extends Controller
         //Upload the images
         $images = [];
         foreach ($request->file('images') as $i => $image) {
-            $destinationPath = 'images/products';
             $imageName = Str::uuid() . "." . $image->clientExtension();
-            $image->move($destinationPath, $imageName);
+            $image->storeAs('public/images/products', $imageName);
             $images[$i] = [
                 'name' => $imageName,
-                'path' => $destinationPath . "/" . $imageName,
+                'path' => 'public/images/products/'  . $imageName,
             ];
         }
         //Create the images
@@ -76,33 +84,33 @@ class ProductController extends Controller
 
         if (array_key_exists('deleted_images', $validated) && count($validated['deleted_images'])) {
             foreach ($validated['deleted_images'] as $src) {
-                $deleted_images = Image::findOrFail($src);
-                unlink($deleted_images->path);
-                $deleted_images->delete();
+                $deleted_image = Image::findOrFail($src);
+                Storage::delete('public/images/products/' . $deleted_image->name);
+                $deleted_image->delete();
             }
         }
 
         $images = [];
         for ($i = 0; $i < count($validated['images']); ++$i) {
             if (!array_key_exists('id', $validated['images'])) {
-                $destinationPath = 'images/products';
+                $destinationPath = 'public/images/products/';
                 $imageName = Str::uuid() . "." . $validated['images'][$i]->clientExtension();
-                $validated['images'][$i]->move($destinationPath, $imageName);
+                $validated['images'][$i]->storeAs($destinationPath, $imageName);
                 $images[$i] = [
                     'name' => $imageName,
-                    'path' => $destinationPath . "/" . $imageName,
+                    'path' => $destinationPath  . $imageName,
                 ];
             } else {
                 $image = Image::findOrFail($validated['images'][$i]['id']);
                 if (!empty($request->file('images')[$i])) {
-                    unlink('images/products/' . $image);
+                    Storage::delete('public/images/products/' . $image);
                     $images_image = $request->file('images')[$i]['name'];
-                    $destinationPath = 'images/products';
+                    $destinationPath = 'public/images/products/';
                     $imageName = Str::uuid() . "." . $images_image->getClientOriginalExtension();
                     $images_image->move($destinationPath, $imageName);
                     $image->update([
                         'name' => $imageName,
-                        'path' => $destinationPath . "/" . $imageName,
+                        'path' => $destinationPath  . $imageName,
                     ]);
                 } else {
                     $image->update([
@@ -138,7 +146,7 @@ class ProductController extends Controller
     {
         $product = Product::findOrfail($id);
         foreach ($product->images as $image) {
-            Storage::delete('images/products/' . $image->name);
+            Storage::delete('public/images/products/' . $image->name);
             $image->delete();
         }
         $product->delete();

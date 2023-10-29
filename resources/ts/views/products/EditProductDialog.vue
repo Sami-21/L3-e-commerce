@@ -1,6 +1,16 @@
 <script>
 import axios from "axios";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import "swiper/css";
+import "swiper/css/pagination";
+import { Pagination } from "swiper/modules";
+
 export default {
+  components: {
+    Swiper,
+    SwiperSlide,
+  },
+
   props: {
     categories: {
       type: Array,
@@ -14,6 +24,12 @@ export default {
       type: Boolean,
       required: true,
     },
+  },
+
+  setup() {
+    return {
+      modules: [Pagination],
+    };
   },
 
   data() {
@@ -82,40 +98,38 @@ export default {
           return { value: feature };
         }),
       },
+      selectedImages: [],
       isDialogVisible: this.isOpen,
-      promotionAvailable: this.product.promotion_price != null,
+      promotionAvailable: this.product.promotion_price != 0,
     };
   },
 
   mounted() {
-    this.product.categoryId;
+    console.log(this.product);
   },
 
   methods: {
     async updateProduct() {
       try {
-        const formData = new FormData();
-        formData.append("name", this.newProduct.name);
-        formData.append("price", this.newProduct.price);
-        if (this.promotionAvailable)
-          formData.append("promotion_price", this.newProduct.promotionPrice);
-        else formData.append("promotion_price", 0);
-        formData.append("category_id", this.newProduct.category.id);
-        formData.append(
-          "features",
-          JSON.stringify(
+        const body = {
+          name: this.newProduct.name,
+          price: this.newProduct.price,
+          promotion_price: this.newProduct.promotion_price,
+          category_id: this.newProduct.category.id,
+          features: JSON.stringify(
             this.newProduct.features.map((feature) => {
               return feature.value;
             })
-          )
-        );
-        this.newProduct.images.forEach((image) => {
-          formData.append("images[]", image);
-        });
-        const { data } = await axios.post(
+          ),
+          images: this.newProduct.images,
+        };
+
+        console.log(body);
+        const { data } = await axios.put(
           `/api/products/update/${this.product.id}`,
-          formData
+          body
         );
+        console.log(data);
         this.$emit("edit-product", {
           message: data.message,
           product: data.product,
@@ -246,8 +260,26 @@ export default {
                   v-model="newProduct.images"
                   :rules="imagesRules"
                   name="images"
+                  chips
+                  accept="image/png,jpg,gif,jpeg"
                   multiple
                 ></v-file-input>
+              </v-row>
+              <v-row class="images-slider mt-10">
+                <swiper
+                  v-if="newProduct.images.length > 0"
+                  class="mySwiper"
+                  :pagination="true"
+                  :modules="modules"
+                >
+                  <swiper-slide
+                    class="image-container"
+                    v-for="(image, index) in newProduct.images"
+                    :key="index"
+                  >
+                    <img :src="image.path" :alt="`Image ${index + 1}`" />
+                  </swiper-slide>
+                </swiper>
               </v-row>
             </v-container>
           </v-card-text>
@@ -271,5 +303,19 @@ export default {
 .btn-container {
   align-items: center;
   justify-content: center;
+}
+.images-slider {
+  display: flex;
+  gap: 20px;
+}
+.images-slider .image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.images-slider .image-container img {
+  width: calc(50% - 10px);
+  height: 250px;
+  object-fit: contain;
 }
 </style>

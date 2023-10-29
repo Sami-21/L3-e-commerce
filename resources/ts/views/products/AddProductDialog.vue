@@ -1,11 +1,27 @@
 <script>
 import axios from "axios";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import "swiper/css";
+import "swiper/css/pagination";
+import { Pagination } from "swiper/modules";
+
 export default {
+  components: {
+    Swiper,
+    SwiperSlide,
+  },
+
   props: {
     categories: {
       type: Array,
       required: true,
     },
+  },
+
+  setup() {
+    return {
+      modules: [Pagination],
+    };
   },
 
   data() {
@@ -78,8 +94,9 @@ export default {
             value: null,
           },
         ],
-        images: null,
+        images: [],
       },
+      selectedImages: [],
       isDialogVisible: false,
       promotionAvailable: false,
     };
@@ -145,8 +162,25 @@ export default {
         value: null,
       });
     },
+
     removeFeature(index) {
       this.newProduct.features.splice(index, 1);
+    },
+
+    handleFileSelection(event) {
+      this.selectedImages = [];
+      const selectedFiles = event.target.files;
+
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const imageURL = URL.createObjectURL(file);
+
+        // Push an object representing the selected image to the array
+        this.selectedImages.push({
+          id: i,
+          url: imageURL,
+        });
+      }
     },
   },
 };
@@ -248,8 +282,27 @@ export default {
                   v-model="newProduct.images"
                   :rules="imagesRules"
                   name="images"
+                  chips
+                  accept="image/png,jpg,gif,jpeg"
                   multiple
+                  @input="($event) => handleFileSelection($event)"
                 ></v-file-input>
+              </v-row>
+              <v-row class="images-slider mt-10">
+                <swiper
+                  v-if="selectedImages.length > 0"
+                  class="mySwiper"
+                  :pagination="true"
+                  :modules="modules"
+                >
+                  <swiper-slide
+                    class="image-container"
+                    v-for="(image, index) in selectedImages"
+                    :key="index"
+                  >
+                    <img :src="image.url" :alt="`Image ${index + 1}`" />
+                  </swiper-slide>
+                </swiper>
               </v-row>
             </v-container>
           </v-card-text>
@@ -273,5 +326,19 @@ export default {
 .btn-container {
   align-items: center;
   justify-content: center;
+}
+.images-slider {
+  display: flex;
+  gap: 20px;
+}
+.images-slider .image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.images-slider .image-container img {
+  width: calc(50% - 10px);
+  height: 250px;
+  object-fit: contain;
 }
 </style>
