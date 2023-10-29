@@ -97,6 +97,7 @@ export default {
         features: JSON.parse(this.product.features).map((feature) => {
           return { value: feature };
         }),
+        deleted_images: [],
       },
       selectedImages: [],
       isDialogVisible: this.isOpen,
@@ -104,32 +105,52 @@ export default {
     };
   },
 
-  mounted() {
-    console.log(this.product);
+  watch: {
+    "newProduct.images": function (newVal, oldVal) {
+      this.newProduct.deleted_images = this.product.images
+        .filter((image) => {
+          return !this.newProduct.images.includes(image);
+        })
+        .map((image) => {
+          return image.id;
+        });
+    },
   },
 
   methods: {
     async updateProduct() {
       try {
-        const body = {
-          name: this.newProduct.name,
-          price: this.newProduct.price,
-          promotion_price: this.newProduct.promotion_price,
-          category_id: this.newProduct.category.id,
-          features: JSON.stringify(
+        const formData = new FormData();
+        formData.append("name", this.newProduct.name);
+        formData.append("price", this.newProduct.price);
+        if (this.promotionAvailable)
+          formData.append("promotion_price", this.newProduct.promotion_price);
+        else formData.append("promotion_price", 0);
+        formData.append("category_id", this.newProduct.category.id);
+        formData.append(
+          "features",
+          JSON.stringify(
             this.newProduct.features.map((feature) => {
               return feature.value;
             })
-          ),
-          images: this.newProduct.images,
-        };
-
-        console.log(body);
-        const { data } = await axios.put(
-          `/api/products/update/${this.product.id}`,
-          body
+          )
         );
-        console.log(data);
+        this.newProduct.images.forEach((image) => {
+          formData.append("images[]", image);
+        });
+        this.newProduct.deleted_images.forEach((image) => {
+          formData.append("deleted_images[]", image);
+        });
+
+        const { data } = await axios.post(
+          `/api/products/update/${this.product.id}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
         this.$emit("edit-product", {
           message: data.message,
           product: data.product,
@@ -153,7 +174,6 @@ export default {
     },
 
     closeDialog() {
-      console.log("edit closed");
       this.$emit("update:isOpen", false);
     },
 
@@ -162,8 +182,25 @@ export default {
         value: null,
       });
     },
+
     removeFeature(index) {
       this.newProduct.features.splice(index, 1);
+    },
+
+    handleFileSelection(event) {
+      this.selectedImages = [];
+      const selectedFiles = event.target.files;
+
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const imageURL = URL.createObjectURL(file);
+
+        // Push an object representing the selected image to the array
+        this.selectedImages.push({
+          id: i,
+          url: imageURL,
+        });
+      }
     },
   },
 };
@@ -263,11 +300,14 @@ export default {
                   chips
                   accept="image/png,jpg,gif,jpeg"
                   multiple
+                  @input="($event) => handleFileSelection($event)"
                 ></v-file-input>
               </v-row>
               <v-row class="images-slider mt-10">
                 <swiper
-                  v-if="newProduct.images.length > 0"
+                  v-if="
+                    newProduct.images.length > 0 && selectedImages.length == 0
+                  "
                   class="mySwiper"
                   :pagination="true"
                   :modules="modules"
@@ -278,6 +318,20 @@ export default {
                     :key="index"
                   >
                     <img :src="image.path" :alt="`Image ${index + 1}`" />
+                  </swiper-slide>
+                </swiper>
+                <swiper
+                  v-if="selectedImages.length > 0"
+                  class="mySwiper"
+                  :pagination="true"
+                  :modules="modules"
+                >
+                  <swiper-slide
+                    class="image-container"
+                    v-for="(image, index) in selectedImages"
+                    :key="index"
+                  >
+                    <img :src="image.url" :alt="`Image ${index + 1}`" />
                   </swiper-slide>
                 </swiper>
               </v-row>

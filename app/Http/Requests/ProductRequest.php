@@ -32,15 +32,6 @@ class ProductRequest extends FormRequest
                     'features' => ['json', 'required'],
                     'images' => ['required', 'array'],
                     'images.*' => ['image', 'mimes:jpeg,png,gif'],
-                    'category_id' => ['required']
-                ];
-            case "PUT":
-                return [
-                    'name' => ['string', 'required', 'max:255'],
-                    'price' => ['numeric', 'required'],
-                    'promotion_price' => ['numeric', 'required'],
-                    'features' => ['json', 'required'],
-                    'images' => ['required', 'array'],
                     'category_id' => ['required'],
                     'deleted_images' => ['array'],
                 ];

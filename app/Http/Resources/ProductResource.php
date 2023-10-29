@@ -25,6 +25,7 @@ class ProductResource extends JsonResource
             "rating" => $this->rating,
             "images" => $this->images->map(function ($image) {
                 return [
+                    'id' => $image->id,
                     'name' => $image->name,
                     'path' => env("APP_URL") . ":8000" . '/storage/images/products/' . $image->name,
                 ];

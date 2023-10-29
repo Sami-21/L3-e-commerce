@@ -75,7 +75,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/images/{id}', [ProductController::class, 'getImages']);
         Route::post('/add', [ProductController::class, 'add']);
         Route::get('/category/{id}', [ProductController::class, 'getByCategory']);
-        Route::put('/update/{id}', [ProductController::class, 'update']);
+        Route::post('/update/{id}', [ProductController::class, 'update']);
         Route::patch('/changeStatus/{id}', [ProductController::class, 'changeStatus']);
         Route::delete('/{id}', [ProductController::class, 'destroy']);
     });

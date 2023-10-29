@@ -81,10 +81,9 @@ class ProductController extends Controller
 
         $product->update($validated);
 
-
         if (array_key_exists('deleted_images', $validated) && count($validated['deleted_images'])) {
-            foreach ($validated['deleted_images'] as $src) {
-                $deleted_image = Image::findOrFail($src);
+            foreach ($validated['deleted_images'] as $image) {
+                $deleted_image = Image::findOrFail($image);
                 Storage::delete('public/images/products/' . $deleted_image->name);
                 $deleted_image->delete();
             }
@@ -94,7 +93,7 @@ class ProductController extends Controller
         for ($i = 0; $i < count($validated['images']); ++$i) {
             if (!array_key_exists('id', $validated['images'])) {
                 $destinationPath = 'public/images/products/';
-                $imageName = Str::uuid() . "." . $validated['images'][$i]->clientExtension();
+                $imageName = Str::uuid() . "." . $request->file('images')[$i]->clientExtension();
                 $validated['images'][$i]->storeAs($destinationPath, $imageName);
                 $images[$i] = [
                     'name' => $imageName,
@@ -126,7 +125,7 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'product updated successfully',
-            new ProductResource($product)
+            'product' => new ProductResource($product)
         ], 201);
     }
 

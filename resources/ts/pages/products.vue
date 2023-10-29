@@ -81,10 +81,10 @@ export default {
     },
 
     addProduct({ message, product }) {
-      this.products.push(product);
       this.snackbar.isVisible = true;
       this.snackbar.message = message;
       this.snackbar.color = "success";
+      this.fetchProducts();
     },
 
     openEditDialog(product) {
@@ -146,6 +146,7 @@ export default {
       v-model:isOpen="isEditProductDialogVisible"
       :categories="categories"
       :product="selectedProduct"
+      @edit-product="fetchProducts"
     />
 
     <v-row>
